@@ -11,7 +11,7 @@ import SwiftUI
 struct AR_DRAWApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            CameraOverlayView()
         }
     }
 }
