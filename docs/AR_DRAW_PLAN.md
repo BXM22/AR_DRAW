@@ -1,5 +1,7 @@
 # AR Draw — Product & Implementation Plan
 
+> **Note (Sept 2026):** The shipped UI uses a **collapsible corner controls menu** instead of a persistent bottom bar with Flip/Lock. See the root [README](../README.md) and [design.md](design.md) for current behavior. This plan remains useful for original goals and acceptance criteria.
+
 ## Goal
 
 A simple iPhone app that lets someone pick a photo from their library, overlay it on the live camera feed, and adjust opacity so they can **trace the outline** onto paper (or any surface).

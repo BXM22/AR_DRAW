@@ -5,6 +5,8 @@ One screen. iPhone only. SwiftUI + AVFoundation + PhotosUI.
 
 Reference prototype: `Tracer.dc.html`.
 
+> **Implementation note:** Controls ship as a **collapsible corner menu** (`ControlsMenu`) rather than a always-visible bottom bar, so the canvas stays clear while tracing. Visual tokens and overlay behavior below still apply.
+
 ---
 
 ## 1. Scope

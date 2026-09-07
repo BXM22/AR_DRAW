@@ -1,0 +1,59 @@
+# Xcode / macOS
+.DS_Store
+*.swp
+*~
+
+# Build
+build/
+DerivedData/
+*.xcuserstate
+*.xccheckout
+*.xcscmblueprint
+
+# User-specific Xcode
+xcuserdata/
+*.xcuserdatad/
+
+# Keep shared schemes if added later
+!*.xcodeproj/xcshareddata/
+
+# Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Packages/
+Package.resolved
+
+# CocoaPods (if ever added)
+Pods/
+
+# Carthage
+Carthage/Build/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# Archives / IPA
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# App shipping
+*.mobileprovision
+
+# Secrets — never commit
+.env
+.env.*
+*.p12
+*.cer
+AuthKey_*.p8
+
+# Claude / local agent junk
+.claude-flow/
+.claude/
