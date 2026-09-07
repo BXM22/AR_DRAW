@@ -6,12 +6,65 @@
 import PhotosUI
 import SwiftUI
 
-struct BottomBar: View {
+/// Collapsible corner menu — keeps Photos + opacity off the canvas while tracing.
+struct ControlsMenu: View {
+    @Binding var isOpen: Bool
     @Binding var pickedItem: PhotosPickerItem?
     @Binding var opacity: Double
     var controlsEnabled: Bool
+    var hasOverlay: Bool
+
+    private let buttonSize: CGFloat = 48
 
     var body: some View {
+        ZStack(alignment: .bottomTrailing) {
+            if isOpen {
+                Color.black.opacity(0.28)
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        withAnimation(.snappy(duration: 0.22)) {
+                            isOpen = false
+                        }
+                    }
+                    .accessibilityLabel("Dismiss menu")
+            }
+
+            VStack(alignment: .trailing, spacing: 10) {
+                if isOpen {
+                    menuPanel
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+
+                menuToggle
+            }
+            .padding(.trailing, Theme.sideInset)
+            .padding(.bottom, Theme.bottomClearance)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+        }
+        .animation(.snappy(duration: 0.22), value: isOpen)
+    }
+
+    private var menuToggle: some View {
+        Button {
+            withAnimation(.snappy(duration: 0.22)) {
+                isOpen.toggle()
+            }
+        } label: {
+            Image(systemName: isOpen ? "xmark" : "slider.horizontal.3")
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(Theme.onCamera)
+                .frame(width: buttonSize, height: buttonSize)
+                .background(.ultraThinMaterial)
+                .overlay {
+                    Rectangle()
+                        .strokeBorder(isOpen ? Theme.accent : Theme.buttonBorder, lineWidth: 1)
+                }
+        }
+        .accessibilityLabel(isOpen ? "Close controls" : "Open controls")
+        .accessibilityHint("Photos and opacity")
+    }
+
+    private var menuPanel: some View {
         VStack(alignment: .leading, spacing: 16) {
             PhotosPicker(
                 selection: $pickedItem,
@@ -21,14 +74,14 @@ struct BottomBar: View {
                 HStack(spacing: 10) {
                     Image(systemName: "photo.on.rectangle")
                         .font(.system(size: 15, weight: .semibold))
-                    Text("PHOTOS")
+                    Text(hasOverlay ? "CHANGE PHOTO" : "PHOTOS")
                         .font(Theme.labelFont(size: 13, weight: .semibold))
                         .tracking(Theme.labelTracking)
                 }
                 .foregroundStyle(Theme.onCamera)
                 .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                 .padding(.horizontal, 14)
-                .background(.ultraThinMaterial)
+                .background(Theme.ink.opacity(0.55))
                 .overlay {
                     Rectangle()
                         .strokeBorder(Theme.buttonBorder, lineWidth: 1)
@@ -36,7 +89,7 @@ struct BottomBar: View {
             }
             .disabled(!controlsEnabled)
             .opacity(controlsEnabled ? 1 : 0.45)
-            .accessibilityLabel("Choose photo")
+            .accessibilityLabel(hasOverlay ? "Change photo" : "Choose photo")
 
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
@@ -54,23 +107,21 @@ struct BottomBar: View {
                         .monospacedDigit()
                 }
 
-                OpacitySlider(value: $opacity, isEnabled: controlsEnabled)
+                OpacitySlider(value: $opacity, isEnabled: controlsEnabled && hasOverlay)
             }
             .opacity(controlsEnabled ? 1 : 0.45)
         }
-        .padding(.horizontal, Theme.sideInset)
-        .padding(.top, 20)
-        .padding(.bottom, Theme.bottomClearance)
-        .frame(maxWidth: 560, alignment: .leading)
-        .frame(maxWidth: .infinity, alignment: .center)
-        .background(
-            LinearGradient(
-                colors: [.clear, Theme.barScrimEnd],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea(edges: .bottom)
-            .allowsHitTesting(false)
-        )
+        .padding(16)
+        .frame(width: 280)
+        .background(.ultraThinMaterial)
+        .overlay(alignment: .top) {
+            Rectangle()
+                .fill(Theme.accent)
+                .frame(height: Theme.plateTopRule)
+        }
+        .overlay {
+            Rectangle()
+                .strokeBorder(Theme.buttonBorder, lineWidth: 1)
+        }
     }
 }

@@ -13,6 +13,7 @@ struct CameraOverlayView: View {
     @State private var committed = OverlayTransform.initial
     @State private var live = OverlayTransform.liveIdentity
     @State private var opacity: Double = 0.4
+    @State private var isMenuOpen = true
     @Environment(\.scenePhase) private var scenePhase
 
     private var renderedTransform: OverlayTransform {
@@ -27,6 +28,7 @@ struct CameraOverlayView: View {
     }
 
     private var controlsEnabled: Bool { !cameraDenied }
+    private var hasOverlay: Bool { overlayImage != nil }
 
     var body: some View {
         GeometryReader { geo in
@@ -47,13 +49,14 @@ struct CameraOverlayView: View {
                     .ignoresSafeArea()
                 }
 
-                if overlayImage != nil, camera.isUsable {
+                // Gestures only when menu is closed so adjusting controls doesn't move the photo.
+                if hasOverlay, camera.isUsable, !isMenuOpen {
                     Color.clear
                         .ignoresSafeArea()
                         .overlayGestures(committed: $committed, live: $live)
                 }
 
-                if overlayImage == nil, !cameraDenied {
+                if !hasOverlay, !cameraDenied {
                     emptyState(in: geo.size)
                 }
 
@@ -65,14 +68,13 @@ struct CameraOverlayView: View {
                     }
                 }
 
-                VStack(spacing: 0) {
-                    Spacer(minLength: 0)
-                    BottomBar(
-                        pickedItem: $pickedItem,
-                        opacity: $opacity,
-                        controlsEnabled: controlsEnabled
-                    )
-                }
+                ControlsMenu(
+                    isOpen: $isMenuOpen,
+                    pickedItem: $pickedItem,
+                    opacity: $opacity,
+                    controlsEnabled: controlsEnabled,
+                    hasOverlay: hasOverlay
+                )
             }
         }
         .ignoresSafeArea()
@@ -121,6 +123,9 @@ struct CameraOverlayView: View {
         overlayImage = Image(uiImage: uiImage)
         committed = .initial
         live = .liveIdentity
+        withAnimation(.snappy(duration: 0.22)) {
+            isMenuOpen = false
+        }
     }
 }
 
