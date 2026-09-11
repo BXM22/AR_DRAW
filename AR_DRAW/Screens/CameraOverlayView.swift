@@ -5,10 +5,12 @@
 
 import PhotosUI
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct CameraOverlayView: View {
     @State private var camera = CameraSession()
     @State private var pickedItem: PhotosPickerItem?
+    @State private var showFileImporter = false
     @State private var overlayImage: Image?
     @State private var committed = OverlayTransform.initial
     @State private var live = OverlayTransform.liveIdentity
@@ -71,6 +73,7 @@ struct CameraOverlayView: View {
                 ControlsMenu(
                     isOpen: $isMenuOpen,
                     pickedItem: $pickedItem,
+                    showFileImporter: $showFileImporter,
                     opacity: $opacity,
                     controlsEnabled: controlsEnabled,
                     hasOverlay: hasOverlay
@@ -96,6 +99,13 @@ struct CameraOverlayView: View {
         .onChange(of: pickedItem) { _, newItem in
             Task { await handlePickedItem(newItem) }
         }
+        .fileImporter(
+            isPresented: $showFileImporter,
+            allowedContentTypes: [.image],
+            allowsMultipleSelection: false
+        ) { result in
+            Task { await handlePickedFile(result) }
+        }
     }
 
     @ViewBuilder
@@ -120,6 +130,16 @@ struct CameraOverlayView: View {
     private func handlePickedItem(_ item: PhotosPickerItem?) async {
         guard let item else { return }
         guard let uiImage = await ImageLoader.loadDownsampledImage(from: item) else { return }
+        applyOverlay(uiImage)
+    }
+
+    private func handlePickedFile(_ result: Result<[URL], Error>) async {
+        guard case .success(let urls) = result, let url = urls.first else { return }
+        guard let uiImage = await ImageLoader.loadDownsampledImage(fromFileURL: url) else { return }
+        applyOverlay(uiImage)
+    }
+
+    private func applyOverlay(_ uiImage: UIImage) {
         overlayImage = Image(uiImage: uiImage)
         committed = .initial
         live = .liveIdentity

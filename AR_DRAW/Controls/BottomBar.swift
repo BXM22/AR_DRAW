@@ -10,6 +10,7 @@ import SwiftUI
 struct ControlsMenu: View {
     @Binding var isOpen: Bool
     @Binding var pickedItem: PhotosPickerItem?
+    @Binding var showFileImporter: Bool
     @Binding var opacity: Double
     var controlsEnabled: Bool
     var hasOverlay: Bool
@@ -61,7 +62,7 @@ struct ControlsMenu: View {
                 }
         }
         .accessibilityLabel(isOpen ? "Close controls" : "Open controls")
-        .accessibilityHint("Photos and opacity")
+        .accessibilityHint("Photos, Files, and opacity")
     }
 
     private var menuPanel: some View {
@@ -71,25 +72,26 @@ struct ControlsMenu: View {
                 matching: .images,
                 photoLibrary: .shared()
             ) {
-                HStack(spacing: 10) {
-                    Image(systemName: "photo.on.rectangle")
-                        .font(.system(size: 15, weight: .semibold))
-                    Text(hasOverlay ? "CHANGE PHOTO" : "PHOTOS")
-                        .font(Theme.labelFont(size: 13, weight: .semibold))
-                        .tracking(Theme.labelTracking)
-                }
-                .foregroundStyle(Theme.onCamera)
-                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                .padding(.horizontal, 14)
-                .background(Theme.ink.opacity(0.55))
-                .overlay {
-                    Rectangle()
-                        .strokeBorder(Theme.buttonBorder, lineWidth: 1)
-                }
+                sourceRow(
+                    systemImage: "photo.on.rectangle",
+                    title: hasOverlay ? "CHANGE PHOTO" : "PHOTOS"
+                )
             }
             .disabled(!controlsEnabled)
             .opacity(controlsEnabled ? 1 : 0.45)
             .accessibilityLabel(hasOverlay ? "Change photo" : "Choose photo")
+
+            Button {
+                showFileImporter = true
+            } label: {
+                sourceRow(
+                    systemImage: "folder",
+                    title: hasOverlay ? "CHANGE FROM FILES" : "FILES"
+                )
+            }
+            .disabled(!controlsEnabled)
+            .opacity(controlsEnabled ? 1 : 0.45)
+            .accessibilityLabel(hasOverlay ? "Change photo from Files" : "Choose photo from Files")
 
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
@@ -119,6 +121,24 @@ struct ControlsMenu: View {
                 .fill(Theme.accent)
                 .frame(height: Theme.plateTopRule)
         }
+        .overlay {
+            Rectangle()
+                .strokeBorder(Theme.buttonBorder, lineWidth: 1)
+        }
+    }
+
+    private func sourceRow(systemImage: String, title: String) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: systemImage)
+                .font(.system(size: 15, weight: .semibold))
+            Text(title)
+                .font(Theme.labelFont(size: 13, weight: .semibold))
+                .tracking(Theme.labelTracking)
+        }
+        .foregroundStyle(Theme.onCamera)
+        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+        .padding(.horizontal, 14)
+        .background(Theme.ink.opacity(0.55))
         .overlay {
             Rectangle()
                 .strokeBorder(Theme.buttonBorder, lineWidth: 1)
